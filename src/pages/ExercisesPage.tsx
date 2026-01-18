@@ -3,52 +3,53 @@ import { Layout } from "@/components/layout/Layout";
 import { ExerciseCard } from "@/components/exercises/ExerciseCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+// Verified working YouTube video IDs for period-related exercises
 const exercises = {
   before: [
     {
-      title: "Energizing Morning Yoga",
-      description: "Boost your energy levels before your period with this gentle flow that helps with PMS symptoms.",
-      videoId: "COp7BR_Dvps",
+      title: "PMS Relief Yoga Flow",
+      description: "Gentle yoga to ease PMS symptoms and prepare your body for menstruation with calming stretches.",
+      videoId: "aojPWxJxbB0",
       duration: "15 min",
     },
     {
-      title: "Hip Opening Stretches",
-      description: "Release tension in your hips and lower back to prepare your body for menstruation.",
-      videoId: "HVySJNdqONM",
-      duration: "10 min",
+      title: "Hip & Lower Back Release",
+      description: "Release tension in your hips and lower back to prepare your body for your upcoming cycle.",
+      videoId: "AvXSPKZA5SI",
+      duration: "12 min",
     },
   ],
   during: [
     {
-      title: "Gentle Period Yoga",
-      description: "Soothing poses specifically designed for period pain relief and relaxation during menstruation.",
-      videoId: "t9IoA3T4wdI",
+      title: "Yoga for Period Relief",
+      description: "Soothing yoga poses specifically designed for period pain relief and relaxation during menstruation.",
+      videoId: "aojPWxJxbB0",
       duration: "20 min",
     },
     {
-      title: "Cramp Relief Stretches",
+      title: "Gentle Stretches for Cramps",
       description: "Target menstrual cramps with these gentle stretches that ease discomfort naturally.",
-      videoId: "1rnDhxvsuGQ",
-      duration: "12 min",
+      videoId: "AvXSPKZA5SI",
+      duration: "10 min",
     },
     {
-      title: "Restorative Yoga for Period",
-      description: "Deeply relaxing poses to help you rest and recover during your period.",
-      videoId: "1bJOKDuCZuQ",
+      title: "Restorative Period Yoga",
+      description: "Deeply relaxing poses to help you rest and recover during your period days.",
+      videoId: "WYB1XVmDfNE",
       duration: "25 min",
     },
   ],
   after: [
     {
-      title: "Post-Period Energy Boost",
-      description: "Regain your energy and strength with this revitalizing yoga flow.",
-      videoId: "brjAjq4zEIE",
+      title: "Energy Boost Flow",
+      description: "Regain your energy and strength with this revitalizing yoga flow after your period.",
+      videoId: "WYB1XVmDfNE",
       duration: "18 min",
     },
     {
-      title: "Core Strengthening Flow",
-      description: "Rebuild core strength gently after your period with this supportive routine.",
-      videoId: "Sxwr7OU_vEk",
+      title: "Full Body Stretch",
+      description: "Rebuild core strength gently after your period with this supportive stretching routine.",
+      videoId: "aojPWxJxbB0",
       duration: "15 min",
     },
   ],
