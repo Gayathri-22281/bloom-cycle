@@ -1,1 +1,4 @@
 project_id = "njhjlvjqrcdtmoynkqwm"
+
+[functions.send-guardian-email]
+verify_jwt = false

@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Heart, AlertTriangle, Mail } from "lucide-react";
+import { Send, Heart, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Message {
   id: string;
@@ -17,8 +19,6 @@ const DISTRESS_KEYWORDS = [
   "hopeless", "can't handle", "give up", "worthless",
   "hurt myself", "self harm", "no point", "better off dead"
 ];
-
-const GUARDIAN_EMAIL = "gayathriumapathy430@gmail.com";
 
 const BOT_RESPONSES: Record<string, string[]> = {
   greeting: [
@@ -52,8 +52,7 @@ export function ChatBot() {
     },
   ]);
   const [input, setInput] = useState("");
-  const [showEmailPrompt, setShowEmailPrompt] = useState(false);
-  const [distressMessage, setDistressMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -84,8 +83,32 @@ export function ChatBot() {
     return BOT_RESPONSES.default[Math.floor(Math.random() * BOT_RESPONSES.default.length)];
   };
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const sendGuardianEmail = async (userMessage: string) => {
+    try {
+      console.log("Automatically sending guardian email for distress message...");
+      
+      const { data, error } = await supabase.functions.invoke('send-guardian-email', {
+        body: {
+          userMessage,
+          timestamp: new Date().toLocaleString(),
+        },
+      });
+
+      if (error) {
+        console.error("Error sending guardian email:", error);
+        return false;
+      }
+
+      console.log("Guardian email sent successfully:", data);
+      return true;
+    } catch (err) {
+      console.error("Failed to send guardian email:", err);
+      return false;
+    }
+  };
+
+  const handleSend = async () => {
+    if (!input.trim() || isSending) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -94,24 +117,36 @@ export function ChatBot() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = input;
+    setInput("");
 
     // Check for distress
-    if (detectDistress(input)) {
-      setDistressMessage(input);
-      setShowEmailPrompt(true);
+    if (detectDistress(currentInput)) {
+      setIsSending(true);
+      
+      // Automatically send email to guardian without asking
+      const emailSent = await sendGuardianEmail(currentInput);
       
       const alertMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "💕 I'm really concerned about what you're sharing. You matter so much, and you don't have to go through this alone. Would you like to reach out to someone who cares about you? I can help you send a message to your guardian. Please remember: you are loved, you are important, and there is help available. 🤗",
+        text: emailSent 
+          ? "💕 I'm really concerned about what you're sharing. You matter so much, and you don't have to go through this alone. I've automatically notified someone who cares about you. Please remember: you are loved, you are important, and there is help available. If you need immediate support, please reach out to a trusted adult or call a helpline. 🤗💕"
+          : "💕 I'm really concerned about what you're sharing. You matter so much, and you don't have to go through this alone. Please remember: you are loved, you are important, and there is help available. Consider reaching out to a trusted adult or calling a helpline. 🤗",
         isBot: true,
         isAlert: true,
       };
       
       setTimeout(() => {
         setMessages(prev => [...prev, alertMessage]);
+        setIsSending(false);
+        if (emailSent) {
+          toast.success("Your guardian has been notified 💕", {
+            description: "Someone who cares about you will reach out soon."
+          });
+        }
       }, 500);
     } else {
-      const botResponse = getBotResponse(input);
+      const botResponse = getBotResponse(currentInput);
       setTimeout(() => {
         setMessages(prev => [...prev, {
           id: (Date.now() + 1).toString(),
@@ -120,24 +155,6 @@ export function ChatBot() {
         }]);
       }, 800);
     }
-
-    setInput("");
-  };
-
-  const handleEmailGuardian = () => {
-    const subject = encodeURIComponent("Concern from FEMCARE - Please Check In");
-    const body = encodeURIComponent(
-      `Dear Guardian,\n\nThis message is being sent from FEMCARE wellness platform.\n\nThe user shared the following message that indicated they may need support:\n\n"${distressMessage}"\n\nPlease check in with them and provide support.\n\nWith care,\nFEMCARE Wellness Platform`
-    );
-    
-    window.location.href = `mailto:${GUARDIAN_EMAIL}?subject=${subject}&body=${body}`;
-    setShowEmailPrompt(false);
-    
-    setMessages(prev => [...prev, {
-      id: Date.now().toString(),
-      text: "💕 Your email app should open now. Remember, reaching out is a sign of strength. You're brave and you're loved. I'm always here if you want to talk more. 🌸",
-      isBot: true,
-    }]);
   };
 
   return (
@@ -180,30 +197,6 @@ export function ChatBot() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Email Prompt */}
-          {showEmailPrompt && (
-            <div className="p-4 bg-accent/50 border-t border-primary/20">
-              <div className="flex items-center gap-3 mb-3">
-                <Mail className="h-5 w-5 text-primary" />
-                <p className="text-sm font-medium text-foreground">
-                  Would you like to reach out to your guardian?
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={handleEmailGuardian} className="flex-1">
-                  Yes, Send Email
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowEmailPrompt(false)}
-                  className="flex-1"
-                >
-                  Not Now
-                </Button>
-              </div>
-            </div>
-          )}
-
           {/* Input */}
           <div className="p-4 border-t border-border">
             <div className="flex gap-2">
@@ -213,8 +206,9 @@ export function ChatBot() {
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
                 placeholder="Share how you're feeling..."
                 className="flex-1"
+                disabled={isSending}
               />
-              <Button onClick={handleSend} size="icon">
+              <Button onClick={handleSend} size="icon" disabled={isSending}>
                 <Send className="h-4 w-4" />
               </Button>
             </div>

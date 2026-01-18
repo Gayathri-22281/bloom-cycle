@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Layout } from "@/components/layout/Layout";
 import patternBg from "@/assets/pattern-bg.jpg";
+import femcareLogo from "@/assets/femcare-logo.png";
 
 const features = [
   {
@@ -56,17 +57,26 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div 
-          className="absolute inset-0 opacity-10"
+          className="absolute inset-0 opacity-15"
           style={{
             backgroundImage: `url(${patternBg})`,
-            backgroundSize: '300px',
-            backgroundRepeat: 'repeat',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-accent/20 to-background" />
         
         <div className="container relative py-20 md:py-32">
           <div className="max-w-3xl mx-auto text-center">
+            <div className="mb-6">
+              <img 
+                src={femcareLogo} 
+                alt="FEMCARE" 
+                className="h-32 md:h-40 w-auto mx-auto object-contain"
+              />
+            </div>
+            
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
               <Sparkles className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-primary">Your wellness journey starts here</span>
