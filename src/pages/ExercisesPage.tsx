@@ -12,7 +12,7 @@ const exercises = {
     {
       title: "PMS Relief Yoga Flow",
       description: "Gentle yoga to ease PMS symptoms and prepare your body for menstruation with calming stretches.",
-      videoId: "t9I_yz4O6w0",
+      videoId: "G4i0FpfL5sE",
       duration: "15 min",
     },
     {
