@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Heart, AlertTriangle } from "lucide-react";
+import { Send, Heart, AlertTriangle, Phone } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,16 @@ interface Message {
   text: string;
   isBot: boolean;
   isAlert?: boolean;
+  isDistress?: boolean;
 }
 
 const DISTRESS_KEYWORDS = [
   "want to die", "kill myself", "suicide", "end my life",
   "hopeless", "can't handle", "give up", "worthless",
-  "hurt myself", "self harm", "no point", "better off dead"
+  "hurt myself", "self harm", "no point", "better off dead",
+  "don't want to live", "want to commit suicide", "feel like killing",
+  "tired of life", "end it all", "no reason to live", "want to disappear",
+  "i hate myself", "nobody cares", "i'm a burden", "can't take it anymore"
 ];
 
 const BOT_RESPONSES: Record<string, string[]> = {
@@ -42,6 +46,17 @@ const BOT_RESPONSES: Record<string, string[]> = {
     "Thank you for sharing with me! 🌸 Remember, you're not alone in this journey. How else can I support you today?",
   ],
 };
+
+const CRISIS_RESPONSE = `💕 I hear you, and I'm really concerned about what you're sharing. Please know that you matter so much, and you don't have to go through this alone.
+
+🆘 **Immediate Help Available:**
+• **iCall**: 9152987821
+• **Vandrevala Foundation**: 1860-2662-345
+• **NIMHANS**: 080-46110007
+
+I've notified someone who cares about you. Please reach out to a trusted adult, friend, or call a helpline right now. You are loved, you are important, and there IS help available. 💗
+
+Would you like to talk about what's making you feel this way? I'm here to listen without judgment. 🤗`;
 
 export function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([
@@ -110,18 +125,20 @@ export function ChatBot() {
   const handleSend = async () => {
     if (!input.trim() || isSending) return;
 
+    const isDistressMessage = detectDistress(input);
+
     const userMessage: Message = {
       id: Date.now().toString(),
       text: input,
       isBot: false,
+      isDistress: isDistressMessage,
     };
 
     setMessages(prev => [...prev, userMessage]);
     const currentInput = input;
     setInput("");
 
-    // Check for distress
-    if (detectDistress(currentInput)) {
+    if (isDistressMessage) {
       setIsSending(true);
       
       // Automatically send email to guardian without asking
@@ -129,9 +146,7 @@ export function ChatBot() {
       
       const alertMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: emailSent 
-          ? "💕 I'm really concerned about what you're sharing. You matter so much, and you don't have to go through this alone. I've automatically notified someone who cares about you. Please remember: you are loved, you are important, and there is help available. If you need immediate support, please reach out to a trusted adult or call a helpline. 🤗💕"
-          : "💕 I'm really concerned about what you're sharing. You matter so much, and you don't have to go through this alone. Please remember: you are loved, you are important, and there is help available. Consider reaching out to a trusted adult or calling a helpline. 🤗",
+        text: CRISIS_RESPONSE,
         isBot: true,
         isAlert: true,
       };
@@ -174,23 +189,28 @@ export function ChatBot() {
                 key={message.id}
                 className={cn(
                   "flex",
-                  message.isBot ? "justify-start" : "justify-end"
+                  message.isBot ? "justify-start" : message.isDistress ? "justify-center" : "justify-end"
                 )}
               >
                 <div
                   className={cn(
-                    "max-w-[80%] rounded-2xl px-4 py-3 shadow-sm",
+                    "max-w-[85%] rounded-2xl px-4 py-3 shadow-sm",
                     message.isBot
                       ? message.isAlert
-                        ? "bg-destructive/10 border-2 border-destructive/30 text-foreground"
+                        ? "bg-rose-50 border-2 border-rose-200 text-foreground"
                         : "bg-card border border-border text-foreground"
-                      : "bg-primary text-primary-foreground"
+                      : message.isDistress
+                        ? "bg-rose-100 border-2 border-rose-300 text-foreground"
+                        : "bg-primary text-primary-foreground"
                   )}
                 >
                   {message.isAlert && (
-                    <AlertTriangle className="h-4 w-4 text-destructive mb-2" />
+                    <div className="flex items-center gap-2 text-rose-600 mb-3">
+                      <AlertTriangle className="h-5 w-5" />
+                      <span className="font-semibold">We're Here For You</span>
+                    </div>
                   )}
-                  <p className="text-sm">{message.text}</p>
+                  <p className="text-sm whitespace-pre-line">{message.text}</p>
                 </div>
               </div>
             ))}
@@ -216,12 +236,15 @@ export function ChatBot() {
         </CardContent>
       </Card>
 
-      {/* Support Info */}
-      <Card className="mt-4 border-primary/20 bg-accent/20">
-        <CardContent className="p-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            💕 Remember: You are never alone. If you're in crisis, please reach out to a trusted adult or call a helpline.
-          </p>
+      {/* Emergency Support Info */}
+      <Card className="mt-4 border-primary/20 bg-gradient-to-r from-accent/20 to-primary/5">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3 justify-center">
+            <Phone className="h-4 w-4 text-primary" />
+            <p className="text-sm text-muted-foreground">
+              💕 In crisis? Call <strong>iCall: 9152987821</strong> or <strong>Vandrevala: 1860-2662-345</strong>
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
