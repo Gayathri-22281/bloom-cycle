@@ -1,11 +1,14 @@
 import { BookOpen } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { TutorialCard } from "@/components/tutorials/TutorialCard";
+import { MenstrualCupIcon } from "@/components/icons/MenstrualCupIcon";
+import { TamponIcon } from "@/components/icons/TamponIcon";
+import { PadIcon } from "@/components/icons/PadIcon";
 
 const tutorials = [
   {
     title: "How to Use Sanitary Pads",
-    icon: "🩹",
+    iconComponent: <PadIcon className="w-8 h-8" />,
     description: "A complete beginner's guide to using sanitary pads safely and comfortably.",
     steps: [
       {
@@ -42,7 +45,7 @@ const tutorials = [
   },
   {
     title: "How to Use Menstrual Cups",
-    icon: "🥤",
+    iconComponent: <MenstrualCupIcon className="w-8 h-8" />,
     description: "Learn the eco-friendly way to manage your period with menstrual cups.",
     steps: [
       {
@@ -80,7 +83,7 @@ const tutorials = [
   },
   {
     title: "How to Use Tampons",
-    icon: "💊",
+    iconComponent: <TamponIcon className="w-8 h-8" />,
     description: "Safe and proper tampon use for comfortable period management.",
     steps: [
       {

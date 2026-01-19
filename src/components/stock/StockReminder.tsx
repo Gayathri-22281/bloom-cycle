@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
-import { Package, ShoppingCart, Check, AlertCircle } from "lucide-react";
+import { Package, ShoppingCart, Check, AlertCircle, ExternalLink, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { usePeriodTracker } from "@/hooks/usePeriodTracker";
+import { MenstrualCupIcon } from "@/components/icons/MenstrualCupIcon";
+import { TamponIcon } from "@/components/icons/TamponIcon";
+import { PadIcon } from "@/components/icons/PadIcon";
+import { toast } from "sonner";
 
 interface PurchaseRecord {
   date: string;
@@ -14,9 +18,27 @@ interface PurchaseRecord {
 const STORAGE_KEY = "femcare_purchases";
 
 const products = [
-  { id: "pads", name: "Sanitary Pads", emoji: "🩹", zeptoSearch: "sanitary+pads" },
-  { id: "cup", name: "Menstrual Cup", emoji: "🥤", zeptoSearch: "menstrual+cup" },
-  { id: "tampons", name: "Tampons", emoji: "💊", zeptoSearch: "tampons" },
+  { 
+    id: "pads", 
+    name: "Sanitary Pads", 
+    icon: <PadIcon className="w-12 h-12" />,
+    zeptoSearch: "sanitary+pads",
+    alternativeUrl: "https://www.amazon.in/s?k=sanitary+pads"
+  },
+  { 
+    id: "cup", 
+    name: "Menstrual Cup", 
+    icon: <MenstrualCupIcon className="w-12 h-12" />,
+    zeptoSearch: "menstrual+cup",
+    alternativeUrl: "https://www.amazon.in/s?k=menstrual+cup"
+  },
+  { 
+    id: "tampons", 
+    name: "Tampons", 
+    icon: <TamponIcon className="w-12 h-12" />,
+    zeptoSearch: "tampons",
+    alternativeUrl: "https://www.amazon.in/s?k=tampons"
+  },
 ];
 
 export function StockReminder() {
@@ -26,6 +48,7 @@ export function StockReminder() {
     return saved ? JSON.parse(saved) : [];
   });
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
+  const [linkFailed, setLinkFailed] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(purchases));
@@ -39,8 +62,34 @@ export function StockReminder() {
 
   const handleBuyNow = (product: typeof products[0]) => {
     const url = `https://www.zeptonow.com/search?query=${product.zeptoSearch}`;
-    window.open(url, "_blank");
+    
+    // Try opening Zepto
+    const newWindow = window.open(url, "_blank");
+    
+    // If popup blocked or failed, show toast with alternative
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+      setLinkFailed(prev => ({ ...prev, [product.id]: true }));
+      toast.error("Couldn't open Zepto", {
+        description: "Try the alternative link below or check your popup settings.",
+        action: {
+          label: "Open Alternative",
+          onClick: () => window.open(product.alternativeUrl, "_blank")
+        }
+      });
+    } else {
+      setSelectedProduct(product.id);
+    }
+  };
+
+  const handleAlternative = (product: typeof products[0]) => {
+    window.open(product.alternativeUrl, "_blank");
     setSelectedProduct(product.id);
+    setLinkFailed(prev => ({ ...prev, [product.id]: false }));
+  };
+
+  const handleRetry = (product: typeof products[0]) => {
+    setLinkFailed(prev => ({ ...prev, [product.id]: false }));
+    handleBuyNow(product);
   };
 
   const markAsPurchased = (productId: string) => {
@@ -53,11 +102,13 @@ export function StockReminder() {
         month: now.toLocaleString('default', { month: 'long', year: 'numeric' })
       }]);
       setSelectedProduct(null);
+      toast.success("Purchase recorded! 🎉", {
+        description: `${product.name} added to your purchase history.`
+      });
     }
   };
 
   const currentMonth = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
-  const thisMonthPurchases = purchases.filter(p => p.month === currentMonth);
 
   return (
     <div className="space-y-6">
@@ -89,7 +140,7 @@ export function StockReminder() {
             <Package className="h-5 w-5 text-primary" />
             Restore Your Stock
           </CardTitle>
-          <CardDescription>Choose a product to order from Zepto</CardDescription>
+          <CardDescription>Choose a product to order from Zepto or alternative stores</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -100,10 +151,40 @@ export function StockReminder() {
                   onClick={() => handleBuyNow(product)}
                 >
                   <CardContent className="p-6 text-center">
-                    <span className="text-4xl mb-3 block">{product.emoji}</span>
+                    <div className="flex justify-center mb-3">{product.icon}</div>
                     <p className="font-medium text-foreground">{product.name}</p>
                   </CardContent>
                 </Card>
+                
+                {/* Link failed - show alternatives */}
+                {linkFailed[product.id] && (
+                  <div className="bg-accent/30 rounded-lg p-3 space-y-2">
+                    <p className="text-xs text-muted-foreground text-center">
+                      Zepto link didn't work? Try these:
+                    </p>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRetry(product)}
+                        className="flex-1"
+                      >
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                        Retry
+                      </Button>
+                      <Button 
+                        size="sm"
+                        variant="default"
+                        onClick={() => handleAlternative(product)}
+                        className="flex-1"
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        Amazon
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                
                 {selectedProduct === product.id && (
                   <Button 
                     onClick={() => markAsPurchased(product.id)}

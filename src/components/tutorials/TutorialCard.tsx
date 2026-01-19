@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 import { ChevronDown, ChevronUp, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,13 +11,14 @@ interface TutorialStep {
 
 interface TutorialCardProps {
   title: string;
-  icon: string;
+  icon?: string;
+  iconComponent?: ReactNode;
   description: string;
   steps: TutorialStep[];
   tips: string[];
 }
 
-export function TutorialCard({ title, icon, description, steps, tips }: TutorialCardProps) {
+export function TutorialCard({ title, icon, iconComponent, description, steps, tips }: TutorialCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -28,7 +29,11 @@ export function TutorialCard({ title, icon, description, steps, tips }: Tutorial
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{icon}</span>
+            {iconComponent ? (
+              <div className="shrink-0">{iconComponent}</div>
+            ) : (
+              <span className="text-3xl">{icon}</span>
+            )}
             <div>
               <CardTitle className="text-lg">{title}</CardTitle>
               <p className="text-sm text-muted-foreground mt-1">{description}</p>
