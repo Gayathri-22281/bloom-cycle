@@ -43,12 +43,14 @@ const products = [
 
 export function StockReminder() {
   const { periodData } = usePeriodTracker();
-  const [purchases, setPurchases] = useState<PurchaseRecord[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [purchases, setPurchases] = useState<PurchaseRecord[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [linkFailed, setLinkFailed] = useState<Record<string, boolean>>({});
+
+  // Clear old localStorage data on mount
+  useEffect(() => {
+    localStorage.removeItem(STORAGE_KEY);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(purchases));
