@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Calendar, Dumbbell, Package, MessageCircle, BookOpen, MapPin, Apple, Heart } from "lucide-react";
+import { Calendar, Dumbbell, Package, MessageCircle, BookOpen, MapPin, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import femcareLogo from "@/assets/femcare-logo.png";
@@ -12,7 +12,6 @@ const navItems = [
   { path: "/chatbot", label: "Support", icon: MessageCircle },
   { path: "/tutorials", label: "Tutorials", icon: BookOpen },
   { path: "/clinics", label: "Find Clinics", icon: MapPin },
-  { path: "/nutrition", label: "Food & Diet", icon: Apple },
   { path: "/health-guide", label: "Health Guide", icon: Heart },
 ];
 
