@@ -16,12 +16,33 @@ interface Message {
 }
 
 const DISTRESS_KEYWORDS = [
-  "want to die", "kill myself", "suicide", "end my life",
-  "hopeless", "can't handle", "give up", "worthless",
-  "hurt myself", "self harm", "no point", "better off dead",
-  "don't want to live", "want to commit suicide", "feel like killing",
-  "tired of life", "end it all", "no reason to live", "want to disappear",
-  "i hate myself", "nobody cares", "i'm a burden", "can't take it anymore"
+  // Direct Self-Harm or Death Intent
+  "i want to die",
+  "i want to get suicide",
+  "i don't want to live",
+  "i want to end my life",
+  "i wish i was dead",
+  "i can't go on anymore",
+  // Extreme Self-Worth Collapse
+  "i am useless",
+  "i am not good enough",
+  "i hate myself",
+  "i have no friends",
+  "my life is pointless",
+  "everyone would be better without me",
+  // Additional variations
+  "want to die",
+  "want to get suicide",
+  "don't want to live",
+  "want to end my life",
+  "wish i was dead",
+  "can't go on anymore",
+  "am useless",
+  "am not good enough",
+  "hate myself",
+  "have no friends",
+  "life is pointless",
+  "nothing matters",
 ];
 
 const BOT_RESPONSES: Record<string, string[]> = {
